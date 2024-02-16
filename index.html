@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Countdown</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500&display=swap" rel="stylesheet">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 500;
+        }
+
+        .centered-text {
+            font-size: 200px;
+        }
+
+        form {
+            margin-top: 20px;
+            font-size: 30px;
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            font-size: 20px;
+            margin-right: 10px;
+            padding: 10px;
+        }
+
+        button {
+            font-size: 20px;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body,
+            html {
+                color: #fff;
+                /* Text color for dark mode */
+                background-color: #121212;
+                /* Background color for dark mode */
+            }
+
+            input,
+            select,
+            button {
+                background-color: #333;
+                color: #fff;
+                border: 1px solid #444;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="countdown" class="centered-text"></div>
+
+    <form id="timeForm">
+        <label for="dateTime">Set Date & Time:</label><br>
+        <input type="datetime-local" id="dateTime">
+        <br><br>
+        <label for="minutes">Or Minutes:</label><br>
+        <input type="number" id="minutes" min="1">
+        <br><br>
+        <button type="submit">Start Countdown</button>
+    </form>
+
+    <script>
+        const countdownElement = document.getElementById('countdown');
+        const hash = window.location.hash.substring(1); // Remove the '#' from the hash
+        let endTime = new Date(hash).getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            let message;
+            if (distance < 0) {
+                message = "Time's up!";
+            } else {
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                if (minutes > 0) {
+                    message = `${minutes} minute${minutes > 1 ? 's' : ''} left`;
+                } else {
+                    message = `${seconds} second${seconds > 1 ? 's' : ''} left`;
+                }
+            }
+
+            countdownElement.innerText = message;
+        }
+
+        function startCountdown() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance > 0) {
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+
+                document.getElementById('timeForm').style.display = 'none';
+            }
+        }
+
+        document.getElementById('timeForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const dateTimeInput = document.getElementById('dateTime').value;
+            const minutesInput = document.getElementById('minutes').value;
+
+            let targetTime;
+            if (dateTimeInput) {
+                targetTime = new Date(dateTimeInput).toISOString();
+            } else if (minutesInput) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + parseInt(minutesInput));
+                targetTime = now.toISOString();
+            }
+
+            if (targetTime) {
+                window.location.hash = targetTime;
+                endTime = new Date(targetTime).getTime();
+
+                startCountdown();
+            }
+        });
+
+        if (window.location.hash) {
+            startCountdown();
+        }
+
+    </script>
+
+</body>
+
+</html>
